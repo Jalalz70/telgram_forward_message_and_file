@@ -3,11 +3,12 @@ from telebot import types
 import time
 import os
 
-bot = telebot.TeleBot('7553560952:AAEgSlitVZzV0VTDI9hdsIlS9I395QFJors')
+bot_API =''
+bot = telebot.TeleBot(bot_API)
 
 # شناسه کانال‌ها
-source_channel_id = -1002251090913
-destination_channel_id = -1002398981248
+source_channel_id = 00
+destination_channel_id = 00
 
 @bot.channel_post_handler(content_types=['text', 'document', 'photo', 'video'])
 def channel_post(message):
