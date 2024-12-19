@@ -1,0 +1,69 @@
+import telebot
+from telebot import types
+import time
+import os
+
+bot = telebot.TeleBot('7553560952:AAEgSlitVZzV0VTDI9hdsIlS9I395QFJors')
+
+# شناسه کانال‌ها
+source_channel_id = -1002251090913
+destination_channel_id = -1002398981248
+
+@bot.channel_post_handler(content_types=['text', 'document', 'photo', 'video'])
+def channel_post(message):
+    print(f"Received message: {message}")
+    if message.text:
+        bot.send_message(destination_channel_id, message.text)
+        print("Text message processed")
+    elif message.document:
+        try:
+            print("Document received")
+            file_info = bot.get_file(message.document.file_id)
+            print(f"File info: {file_info}")
+            downloaded_file = bot.download_file(file_info.file_path)
+            print("File downloaded")
+
+            # تغییر مسیر فایل موقت به دایرکتوری فعلی
+            local_file_path = os.path.join(os.getcwd(), message.document.file_name)
+            with open(local_file_path, 'wb') as new_file:
+                new_file.write(downloaded_file)
+
+            with open(local_file_path, 'rb') as document:
+                bot.send_document(destination_channel_id, document, disable_notification=True)
+            
+            # حذف فایل موقت
+            os.remove(local_file_path)
+            print("File sent and temporary file removed")
+
+        except Exception as e:
+            print(f"An error occurred while sending document: {e}")
+
+    elif message.photo:
+        try:
+            print("Photo received")
+            bot.send_photo(destination_channel_id, message.photo[-1].file_id)
+            print("Photo sent")
+        except Exception as e:
+            print(f"An error occurred while sending photo: {e}")
+
+    elif message.video:
+        try:
+            print("Video received")
+            bot.send_video(destination_channel_id, message.video.file_id)
+            print("Video sent")
+        except Exception as e:
+            print(f"An error occurred while sending video: {e}")
+
+    else:
+        print(f"Unknown message type: {message.content_type}")
+
+def run_bot():
+    while True:
+        try:
+            bot.polling(none_stop=True, interval=0)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            time.sleep(5)  # Wait 5 seconds before restarting the bot
+
+if __name__ == '__main__':
+    run_bot()
